@@ -1,14 +1,13 @@
-// PidginWinToastLib.cpp : Defines the exported functions for the DLL application.
+// DinoWinToastLib.cpp : Defines the exported functions for the DLL application.
 //
 
 #include "stdafx.h"
-#include "PidginWinToastLib.h"
+#include "DinoWinToastLib.h"
 
 using namespace std;
 using namespace WinToastLib;
 
 bool isInit = false;
-void(*clickCallback)(void* conv) = nullptr;
 
 std::wstring getTextFromHtml(std::wstring);
 
@@ -23,8 +22,10 @@ std::wstring getTextFromHtml(std::wstring);
 
 class WinToastHandler : public IWinToastHandler {
 public:
-  void* conv = nullptr;
-  WinToastHandler(void* conv = nullptr);
+  void(*click_callback)(int conv_id, void* class_obj) = nullptr;
+  void* class_obj = nullptr;
+  int conv_id = 0;
+  WinToastHandler(int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj));
   // Public interfaces
   void toastActivated() const;
   void toastActivated(int actionIndex) const;
@@ -32,20 +33,20 @@ public:
   void toastFailed() const;
 };
 
-WinToastHandler::WinToastHandler(void* conv) :
-  conv(conv) {
+WinToastHandler::WinToastHandler(int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj)) :
+  conv_id(conv_id), class_obj(class_obj), click_callback(click_callback) {
 }
 
 void WinToastHandler::toastActivated() const {
-  if (clickCallback != nullptr && this->conv != nullptr) {
-    clickCallback(this->conv);
+  if (this->click_callback != nullptr && this->class_obj != nullptr && this->conv_id > 0) {
+    this->click_callback(this->conv_id, this->class_obj);
   }
 }
 
 void WinToastHandler::toastActivated(int actionIndex) const
 {
-  if (clickCallback != nullptr && this->conv != nullptr) {
-    clickCallback(this->conv);
+  if (this->click_callback != nullptr && this->class_obj != nullptr && this->conv_id > 0) {
+    this->click_callback(this->conv_id, this->class_obj);
   }
 }
 
@@ -55,9 +56,8 @@ void WinToastHandler::toastDismissed(WinToastDismissalReason state) const {
 void WinToastHandler::toastFailed() const {
 }
 
-extern "C" int pidginWinToastLibInit(void(*_clickCallback)(void* conv))
+extern "C" int dinoWinToastLibInit()
 {
-  clickCallback = _clickCallback;
   try {
     WinToast::instance()->setAppName(L"Dino");
     WinToast::instance()->setAppUserModelId(
@@ -73,7 +73,7 @@ extern "C" int pidginWinToastLibInit(void(*_clickCallback)(void* conv))
   }
 }
 
-extern "C" int pidginWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, const char* protocolName, void* conv)
+extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj))
 {
   if (isInit) {
     if (sender == nullptr) {
@@ -82,7 +82,7 @@ extern "C" int pidginWinToastLibShowMessage(const char* sender, const char* mess
     try {
       std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-      WinToastHandler* handler = new WinToastHandler(conv);
+      WinToastHandler* handler = new WinToastHandler(conv_id, class_obj, click_callback);
       WinToastTemplate templ;
       std::wstring sImagePath;
 
@@ -100,11 +100,6 @@ extern "C" int pidginWinToastLibShowMessage(const char* sender, const char* mess
       std::wstring sMessage = converter.from_bytes(message);
       sMessage = stripHTML(sMessage);
       templ.setTextField(sMessage, WinToastTemplate::SecondLine);
-
-      if (protocolName != NULL) {
-        std::wstring sProtocolName = converter.from_bytes(protocolName);
-        templ.setAttributionText(sProtocolName);
-      }
 
       WinToast::WinToastError error;
       INT64 toastResult = WinToast::instance()->showToast(templ, handler, &error);

@@ -15,16 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PidginWinToastLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wintoastlib.h">
@@ -33,18 +27,21 @@
     <ClInclude Include="stripHTML.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DinoWinToastLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PidginWinToastLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="wintoastlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stripHTML.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DinoWinToastLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
