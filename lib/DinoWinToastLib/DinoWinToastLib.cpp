@@ -23,9 +23,9 @@ std::wstring getTextFromHtml(std::wstring);
 class WinToastHandler : public IWinToastHandler {
 public:
   void(*click_callback)(int conv_id, void* class_obj) = nullptr;
-  void* class_obj = nullptr;
+  void* callback_target = nullptr;
   int conv_id = 0;
-  WinToastHandler(int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj));
+  WinToastHandler(int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target);
   // Public interfaces
   void toastActivated() const;
   void toastActivated(int actionIndex) const;
@@ -33,20 +33,20 @@ public:
   void toastFailed() const;
 };
 
-WinToastHandler::WinToastHandler(int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj)) :
-  conv_id(conv_id), class_obj(class_obj), click_callback(click_callback) {
+WinToastHandler::WinToastHandler(int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target) :
+  conv_id(conv_id), callback_target(callback_target), click_callback(click_callback) {
 }
 
 void WinToastHandler::toastActivated() const {
-  if (this->click_callback != nullptr && this->class_obj != nullptr && this->conv_id > 0) {
-    this->click_callback(this->conv_id, this->class_obj);
+  if (this->click_callback != nullptr && this->callback_target != nullptr && this->conv_id > 0) {
+    this->click_callback(this->conv_id, this->callback_target);
   }
 }
 
 void WinToastHandler::toastActivated(int actionIndex) const
 {
-  if (this->click_callback != nullptr && this->class_obj != nullptr && this->conv_id > 0) {
-    this->click_callback(this->conv_id, this->class_obj);
+  if (this->click_callback != nullptr && this->callback_target != nullptr && this->conv_id > 0) {
+    this->click_callback(this->conv_id, this->callback_target);
   }
 }
 
@@ -73,7 +73,7 @@ extern "C" int dinoWinToastLibInit()
   }
 }
 
-extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj))
+extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target)
 {
   if (isInit) {
     if (sender == nullptr) {
@@ -82,7 +82,7 @@ extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* messag
     try {
       std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-      WinToastHandler* handler = new WinToastHandler(conv_id, class_obj, click_callback);
+      WinToastHandler* handler = new WinToastHandler(conv_id, click_callback, callback_target);
       WinToastTemplate templ;
       std::wstring sImagePath;
 

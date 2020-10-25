@@ -21,7 +21,7 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
-  int DINOWINTOASTLIB_API dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void* class_obj, void(*click_callback)(int conv_id, void* class_obj));
+  int DINOWINTOASTLIB_API dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target);
 #ifdef __cplusplus
 } // extern "C"
 #endif
