@@ -82,7 +82,7 @@ extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* messag
     try {
       std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-      WinToastHandler* handler = new WinToastHandler(conv_id, click_callback, callback_target);
+      auto handler = std::make_shared<WinToastHandler>(conv_id, click_callback, callback_target);
       WinToastTemplate templ;
       std::wstring sImagePath;
 
