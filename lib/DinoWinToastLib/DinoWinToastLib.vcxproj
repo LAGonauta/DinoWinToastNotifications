@@ -152,16 +152,19 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DinoWinToastHandler.hpp" />
     <ClInclude Include="DinoWinToastLib.h" />
+    <ClInclude Include="DinoWinToastTemplate.h" />
+    <ClInclude Include="DinoWinToastDllExport.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="stripHTML.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="wintoastlib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DinoWinToastHandler.cpp" />
     <ClCompile Include="DinoWinToastLib.cpp" />
+    <ClCompile Include="DinoWinToastTemplate.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="stripHTML.cpp" />
     <ClCompile Include="wintoastlib.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

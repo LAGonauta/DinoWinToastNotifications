@@ -11,9 +11,7 @@
 // Windows Header Files:
 #include <windows.h>
 
-
 #include <string>
 #include <locale>
 #include <codecvt>
 #include "wintoastlib.h"
-#include "stripHTML.h"

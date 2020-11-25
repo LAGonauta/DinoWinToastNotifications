@@ -24,10 +24,16 @@
     <ClInclude Include="wintoastlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stripHTML.h">
+    <ClInclude Include="DinoWinToastLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DinoWinToastLib.h">
+    <ClInclude Include="DinoWinToastHandler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DinoWinToastTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DinoWinToastDllExport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,10 +44,13 @@
     <ClCompile Include="wintoastlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stripHTML.cpp">
+    <ClCompile Include="DinoWinToastLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DinoWinToastLib.cpp">
+    <ClCompile Include="DinoWinToastHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DinoWinToastTemplate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

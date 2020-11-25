@@ -3,107 +3,21 @@
 
 #include "stdafx.h"
 #include "DinoWinToastLib.h"
-
-using namespace std;
-using namespace WinToastLib;
+#include "DinoWinToastHandler.hpp"
 
 bool isInit = false;
 
-std::wstring getTextFromHtml(std::wstring);
-
-//char* copyCharArrayToHeap(char* source) {
-//	size_t size = strlen(source) + 1;
-//	char* dest = (char*)malloc(size);
-//	if (dest != nullptr) {
-//		strcpy(dest, source);
-//	}
-//	return dest;
-//}
-
-class WinToastHandler : public IWinToastHandler {
-public:
-  void(*click_callback)(int conv_id, void* class_obj) = nullptr;
-  void* callback_target = nullptr;
-  int conv_id = 0;
-  WinToastHandler(int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target);
-  // Public interfaces
-  void toastActivated() const;
-  void toastActivated(int actionIndex) const;
-  void toastDismissed(WinToastDismissalReason state) const;
-  void toastFailed() const;
-};
-
-WinToastHandler::WinToastHandler(int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target) :
-  conv_id(conv_id), callback_target(callback_target), click_callback(click_callback) {
-}
-
-void WinToastHandler::toastActivated() const {
-  if (this->click_callback != nullptr && this->callback_target != nullptr && this->conv_id > 0) {
-    this->click_callback(this->conv_id, this->callback_target);
-  }
-}
-
-void WinToastHandler::toastActivated(int actionIndex) const
+extern "C"
 {
-  if (this->click_callback != nullptr && this->callback_target != nullptr && this->conv_id > 0) {
-    this->click_callback(this->conv_id, this->callback_target);
-  }
-}
-
-void WinToastHandler::toastDismissed(WinToastDismissalReason state) const {
-}
-
-void WinToastHandler::toastFailed() const {
-}
-
-extern "C" int dinoWinToastLibInit()
-{
-  try {
-    WinToast::instance()->setAppName(L"Dino");
-    WinToast::instance()->setAppUserModelId(
-      WinToast::configureAUMI(L"Dino", L"Dino"));
-
-    WinToast::WinToastError error;
-    isInit = WinToast::instance()->initialize(&error);
-    return error;
-  }
-  catch (...) {
-    // unknown exception
-    return -1;
-  }
-}
-
-extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* message, const char* imagePath, int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target)
-{
-  if (isInit) {
-    if (sender == nullptr) {
-      return WinToast::WinToastError::InvalidParameters;
-    }
+  int dinoWinToastLibInit()
+  {
     try {
-      std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+      WinToastLib::WinToast::instance()->setAppName(L"Dino");
+      WinToastLib::WinToast::instance()->setAppUserModelId(
+        WinToastLib::WinToast::configureAUMI(L"Dino", L"Dino"));
 
-      auto handler = std::make_shared<WinToastHandler>(conv_id, click_callback, callback_target);
-      WinToastTemplate templ;
-      std::wstring sImagePath;
-
-      if (imagePath != NULL) {
-        templ = WinToastTemplate(WinToastTemplate::ImageAndText02);
-        sImagePath = converter.from_bytes(imagePath);
-        templ.setImagePath(sImagePath);
-      }
-      else {
-        templ = WinToastTemplate(WinToastTemplate::Text02);
-      }
-
-      std::wstring sSender = converter.from_bytes(sender);
-      templ.setTextField(sSender, WinToastTemplate::FirstLine);
-      std::wstring sMessage = converter.from_bytes(message);
-      sMessage = stripHTML(sMessage);
-      templ.setTextField(sMessage, WinToastTemplate::SecondLine);
-
-      WinToast::WinToastError error;
-      INT64 toastResult = WinToast::instance()->showToast(templ, handler, &error);
-
+      WinToastLib::WinToast::WinToastError error;
+      isInit = WinToastLib::WinToast::instance()->initialize(&error);
       return error;
     }
     catch (...) {
@@ -111,7 +25,28 @@ extern "C" int dinoWinToastLibShowMessage(const char* sender, const char* messag
       return -1;
     }
   }
-  else {
-    return WinToast::WinToastError::NotInitialized;
+
+  int dinoWinToastLibShowMessage(dino_wintoasttemplate templ, int conv_id, dinoWinToastLibNotificationCallback click_callback, void* callback_target)
+  {
+    if (isInit) {
+      if (templ == nullptr) {
+        return WinToastLib::WinToast::WinToastError::InvalidParameters;
+      }
+
+      try {
+        auto handler = std::make_shared<WinToastHandler>(conv_id, click_callback, callback_target);
+        WinToastLib::WinToast::WinToastError error;
+        INT64 toastResult = WinToastLib::WinToast::instance()->showToast(*static_cast<WinToastLib::WinToastTemplate*>(templ), handler, &error);
+
+        return error;
+      }
+      catch (...) {
+        // unknown exception
+        return -1;
+      }
+    }
+    else {
+      return WinToastLib::WinToast::WinToastError::NotInitialized;
+    }
   }
 }
