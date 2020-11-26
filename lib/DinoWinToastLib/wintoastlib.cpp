@@ -232,7 +232,7 @@ namespace Util {
     return hr;
   }
 
-  inline HRESULT setEventHandlers(_In_ IToastNotification* notification, _In_ std::shared_ptr<IWinToastHandler> eventHandler, _In_ INT64 expirationTime) {
+  inline std::tuple<HRESULT, EventRegistrationToken, EventRegistrationToken, EventRegistrationToken>  setEventHandlers(_In_ IToastNotification* notification, _In_ std::shared_ptr<IWinToastHandler> eventHandler, _In_ INT64 expirationTime) {
     EventRegistrationToken activatedToken, dismissedToken, failedToken;
     HRESULT hr = notification->add_Activated(
       Callback < Implements < RuntimeClassFlags<ClassicCom>,
@@ -280,7 +280,7 @@ namespace Util {
             }).Get(), &failedToken);
       }
     }
-    return hr;
+    return std::make_tuple(hr, activatedToken, dismissedToken, failedToken);
   }
 
   inline HRESULT addAttribute(_In_ IXmlDocument* xml, const std::wstring& name, IXmlNamedNodeMap* attributeMap) {
@@ -640,8 +640,11 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  std::shared_
                   hr = notification->put_ExpirationTime(&expirationDateTime);
                 }
 
+                std::tuple<EventRegistrationToken, EventRegistrationToken, EventRegistrationToken> tokens;
                 if (SUCCEEDED(hr)) {
-                  hr = Util::setEventHandlers(notification.Get(), handler, expiration);
+                  auto result = Util::setEventHandlers(notification.Get(), handler, expiration);
+                  hr = std::get<0>(result);
+                  tokens = std::make_tuple(std::get<1>(result), std::get<2>(result), std::get<3>(result));
                   if (FAILED(hr)) {
                     setError(error, WinToastError::InvalidHandler);
                   }
@@ -652,7 +655,7 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  std::shared_
                   hr = CoCreateGuid(&guid);
                   if (SUCCEEDED(hr)) {
                     id = guid.Data1;
-                    _buffer[id] = notification;
+                    _buffer[id] = std::make_tuple(notification, tokens);
                     DEBUG_MSG("xml: " << Util::AsString(xmlDocument));
                     hr = notifier->Show(notification.Get());
                     if (FAILED(hr)) {
@@ -690,9 +693,15 @@ bool WinToast::hideToast(_In_ INT64 id) {
   if (find) {
     bool succeded = false;
     ComPtr<IToastNotifier> notify = notifier(&succeded);
+    auto notification = std::get<0>(_buffer[id]).Get();
     if (succeded) {
-      notify->Hide(_buffer[id].Get());
+      notify->Hide(notification);
     }
+    auto tokens = std::get<1>(_buffer[id]);
+    notification->remove_Activated(std::get<0>(tokens));
+    notification->remove_Dismissed(std::get<1>(tokens));
+    notification->remove_Failed(std::get<2>(tokens));
+
     _buffer.erase(id);
   }
   return find;
@@ -704,7 +713,12 @@ void WinToast::clear() {
   if (succeded) {
     auto end = _buffer.end();
     for (auto it = _buffer.begin(); it != end; ++it) {
-      notify->Hide(it->second.Get());
+      auto notification = std::get<0>(it->second).Get();
+      notify->Hide(notification);
+      auto tokens = std::get<1>(it->second);
+      notification->remove_Activated(std::get<0>(tokens));
+      notification->remove_Dismissed(std::get<1>(tokens));
+      notification->remove_Failed(std::get<2>(tokens));
     }
   }
   _buffer.clear();

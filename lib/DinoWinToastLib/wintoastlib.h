@@ -34,6 +34,7 @@ namespace WinToastLib {
       ApplicationHidden = ToastDismissalReason::ToastDismissalReason_ApplicationHidden,
       TimedOut = ToastDismissalReason::ToastDismissalReason_TimedOut
     };
+    virtual ~IWinToastHandler() {}
     virtual void toastActivated() const = 0;
     virtual void toastActivated(int actionIndex) const = 0;
     virtual void toastDismissed(WinToastDismissalReason state) const = 0;
@@ -145,7 +146,8 @@ namespace WinToastLib {
     bool                                            _hasCoInitialized;
     std::wstring                                    _appName;
     std::wstring                                    _aumi;
-    std::map<INT64, ComPtr<IToastNotification>>     _buffer;
+    std::map<INT64, std::tuple<ComPtr<IToastNotification>, std::tuple<EventRegistrationToken, EventRegistrationToken, EventRegistrationToken>>>     _buffer;
+    
 
     HRESULT validateShellLinkHelper(_Out_ bool& wasChanged);
     HRESULT createShellLinkHelper();
