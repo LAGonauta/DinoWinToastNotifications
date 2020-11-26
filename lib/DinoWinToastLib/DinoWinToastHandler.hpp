@@ -1,15 +1,15 @@
 #pragma once
 
 #include "wintoastlib.h"
+#include "DinoWinToastLib.h"
 
 class WinToastHandler : public WinToastLib::IWinToastHandler {
 private:
-  void(*click_callback)(int conv_id, void* class_obj) = nullptr;
-  void* callback_target = nullptr;
-  int conv_id = 0;
+  dinoWinToastLib_Notification_Callbacks callbacks{};
 
 public:
-  WinToastHandler(int conv_id, void(*click_callback)(int conv_id, void* callback_target), void* callback_target);
+  WinToastHandler(dinoWinToastLib_Notification_Callbacks callbacks);
+  ~WinToastHandler();
 
   // Public interfaces
   void toastActivated() const;

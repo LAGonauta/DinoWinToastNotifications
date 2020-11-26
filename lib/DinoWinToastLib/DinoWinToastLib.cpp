@@ -9,7 +9,19 @@ bool isInit = false;
 
 extern "C"
 {
-  int dinoWinToastLibInit()
+  dinoWinToastLib_Notification_Callbacks* dinoWinToastLib_NewCallbacks()
+  {
+    return new dinoWinToastLib_Notification_Callbacks();
+  }
+
+  void dinoWinToastLib_DestroyCallbacks(dinoWinToastLib_Notification_Callbacks* callbacks)
+  {
+    if (callbacks != nullptr) {
+      delete callbacks;
+    }
+  }
+
+  int dinoWinToastLib_Init()
   {
     try {
       WinToastLib::WinToast::instance()->setAppName(L"Dino");
@@ -26,7 +38,7 @@ extern "C"
     }
   }
 
-  int dinoWinToastLibShowMessage(dino_wintoasttemplate templ, int conv_id, dinoWinToastLibNotificationCallback click_callback, void* callback_target)
+  int dinoWinToastLib_ShowMessage(dino_wintoasttemplate templ, dinoWinToastLib_Notification_Callbacks* callbacks)
   {
     if (isInit) {
       if (templ == nullptr) {
@@ -34,11 +46,9 @@ extern "C"
       }
 
       try {
-        auto handler = std::make_shared<WinToastHandler>(conv_id, click_callback, callback_target);
+        auto handler = std::make_shared<WinToastHandler>(*callbacks);
         WinToastLib::WinToast::WinToastError error;
-        INT64 toastResult = WinToastLib::WinToast::instance()->showToast(*static_cast<WinToastLib::WinToastTemplate*>(templ), handler, &error);
-
-        return error;
+        return WinToastLib::WinToast::instance()->showToast(*static_cast<WinToastLib::WinToastTemplate*>(templ), handler, &error);
       }
       catch (...) {
         // unknown exception
