@@ -43,4 +43,4 @@ jobs:
         name: dinowintoastlib-32bit-libraries
         path: |
           lib/Release/DinoWinToastLib.dll
-          lib/Release/DinoWinToastLib.dll
+          lib/Release/DinoWinToastLib.lib
