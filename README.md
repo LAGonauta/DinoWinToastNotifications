@@ -1,6 +1,6 @@
 # DinoWinToastNotifications
 
-Windows toast notification plugin for [Dino](https://dino.im/).
+Windows toast notification bridge for [Dino](https://dino.im/).
 
 Shows notifications in the standard Windows design.
 
