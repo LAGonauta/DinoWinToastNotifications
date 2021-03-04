@@ -1,3 +1,5 @@
+**Repository archived: not needed anymore thanks to WinRT headers**
+
 # DinoWinToastNotifications
 
 Windows toast notification bridge for [Dino](https://dino.im/).
